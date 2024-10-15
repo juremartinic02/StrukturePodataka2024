@@ -4,7 +4,6 @@
 #include<stdlib.h>
 
 #define ERROR_OPENING_FILE -1
-#define ERROR_ALLOCATING_MEMORY -2
 #define MAX_NAME_LENGTH 100
 
 // Stavimo 1024 jer je to maksimalni broj znakova u redu
@@ -110,7 +109,7 @@ StudentPos allocate_students(int numStudents)
     if (!students)
     {
         printf("Nesupjela alokacija memorije!");
-        return ERROR_ALLOCATING_MEMORY;
+        return NULL;
     }
 
     return students;
