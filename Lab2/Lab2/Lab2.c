@@ -3,6 +3,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+// zbog isalpha funckije koja nam omogucuje provjeru korisnikovog upisa
+#include<ctype.h>
 #include<crtdbg.h>
 
 #define MAX_NAME_LENGTH 100
@@ -40,7 +42,7 @@ int addNewPersonToLinkedList(PersonPosition);
 	----------------------------------
 		Funkcija koja ispisuje jednostruko vezanu listu
 */
-int printLikedList(PersonPosition);
+void printLikedList(PersonPosition);
 
 /*
 	Funkcija addNewPersonToEndOfLinkedList: (funckija 3 u menu)
@@ -64,7 +66,14 @@ int findElementOfLinkedListBySurname(PersonPosition);
 */
 int deleteElementFromLinkedList(PersonPosition);
 
+/*
+	Funckija menuForFunctions
+	-----------------------------
+		Funckija kreira izbornik u kojem se pod rednim brojevima nude funckije za manipuliranje jednostruko vezane liste
+*/
 int menuForFunctions(PersonPosition);
+
+int isStringValid(char*);
 
 int main()
 {
@@ -72,7 +81,23 @@ int main()
 
 	menuForFunctions(&head);
 
+	_CrtDumpMemoryLeaks();
 	return EXIT_SUCCESS;
+}
+
+/*
+	Funckija isStringValid
+	---------------------------------
+		Funckija provjerava da li je unos gdje trazimo tip varijable char ispravan, te ako nije korisniku ponovno nudi istu stvar za unijeti
+*/
+// PITANJE ZA PROFESORICU: ovdje sam se pomogao chat-gpt. Da li se ovo moglo na drugaciji nacin preko if while petlje ili samo da zapamtit da se to radi preko isalpha integrirane funckije
+int isStringValid(char* input) {
+	for (int i = 0; input[i] != '\0'; i++) {
+		if (!isalpha(input[i])) {  // Check if each character is a letter
+			return 0;  // Return 0 if a non-letter character is found
+		}
+	}
+	return 1;  // Return 1 if all characters are letters
 }
 
 PersonPosition createNewPerson(char* name, char* surname, int birthYear)
@@ -102,12 +127,36 @@ int addNewPersonToLinkedList(PersonPosition head)
 	char surname[MAX_NAME_LENGTH];
 	int birthYear;
 
-	printf("Unesite ime: ");
 	// PITANJE ZA PROFESORICU: ovo je naravno jednostavniji nacin za rijesiti provjeru scanf return value-a, da li smijemo tako ostaviti ili moramo if funkcijom provjeravat
 	// (void) ispred scanf-a sprjecava upozorenje: 'return value ignored' tako sto compileru daje do znanja da ju namjerno ignoriramo
-	(void)scanf("%s", name);
-	printf("Unesite prezime: ");
-	(void)scanf("%s", surname);
+	// PITANJE ZA PROFESORICU: koji je drugaciji nacin osim ovog "BRUTEFORCE-anja" kroz do while petlju? Odvojena funckija mozda?
+
+	int success;
+
+	do
+	{
+		printf("Unesite ime: ");
+		success = scanf("%s", name);
+		if (success != 1 || !isStringValid(name))
+		{
+			printf("Greska! Unesite ispravan tip varijable!\n");
+			success = 0;
+			while (getchar() != '\n');
+		}
+	} while (!success);
+
+	do
+	{
+		printf("Unesite prezime: ");
+		success = scanf("%s", surname);
+		if (success != 1 || !isStringValid(surname))
+		{
+			printf("Greska! Unesite ispravan tip varijable!\n");
+			success = 0;
+			while (getchar() != '\n');
+		}
+	} while (!success);
+
 	printf("Unesite godinu rodjenja: ");
 	(void)scanf("%d", &birthYear);
 
@@ -127,7 +176,7 @@ int addNewPersonToLinkedList(PersonPosition head)
 	return EXIT_SUCCESS;
 }
 
-int printLikedList(PersonPosition first)
+void printLikedList(PersonPosition first)
 {
 	printf("\nElementi jednostruko vezane liste su: \n");
 	
@@ -146,11 +195,32 @@ int addNewPersonToEndOfLinkedList(PersonPosition head)
 	char name[MAX_NAME_LENGTH];
 	char surname[MAX_NAME_LENGTH];
 	int birthYear;
+	int success;
 
-	printf("Unesite ime: ");
-	(void)scanf("%s", name);
-	printf("Unesite prezime: ");
-	(void)scanf("%s", surname);
+	do
+	{
+		printf("Unesite ime: ");
+		success = scanf("%s", name);
+		if (success != 1 || !isStringValid(name))
+		{
+			printf("Greska! Unesite ispravan tip varijable!\n");
+			success = 0;
+			while (getchar() != '\n');
+		}
+	} while (!success);
+
+	do
+	{
+		printf("Unesite prezime: ");
+		success = scanf("%s", surname);
+		if (success != 1 || !isStringValid(surname))
+		{
+			printf("Greska! Unesite ispravan tip varijable!\n");
+			success = 0;
+			while (getchar() != '\n');
+		}
+	} while (!success);
+
 	printf("Unesite godinu rodjenja: ");
 	(void)scanf("%d", &birthYear);
 
@@ -177,9 +247,20 @@ int findElementOfLinkedListBySurname(PersonPosition first)
 	char surnameToFind[MAX_NAME_LENGTH];
 	// inicijalizirana vrijednost koja nam pomaze u slucajevima kada nadjemo osobu ili obratno
 	int found = 0;
+	int success;
 
-	printf("Unesi prezime osobe koju zelis naci: ");
-	(void)scanf("%s", surnameToFind);
+	do
+	{
+		printf("Unesi prezime osobe koju zelis naci: ");
+		success = scanf("%s", surnameToFind);
+		if (success != 1 || !isStringValid(surnameToFind))
+		{
+			printf("Greska! Unesite ispravan tip varijable!\n");
+			success = 0;
+			while (getchar() != '\n');
+		}
+	} while (!success);
+	
 
 	while (first != NULL) {
 		if (strcmp(first->surname, surnameToFind) == 0) {
@@ -211,8 +292,21 @@ int deleteElementFromLinkedList(PersonPosition head)
 	PersonPosition current = head->next;
 	PersonPosition previous = head;
 
-	printf("Unesite prezime osobe koju zelite izbrisati: ");
-	(void)scanf("%s", surnameToDelete);
+	int success;
+
+	do
+	{
+		printf("Unesite prezime osobe koju zelite izbrisati: ");
+		success = scanf("%s", surnameToDelete);
+		if (success != 1 || !isStringValid(surnameToDelete))
+		{
+			printf("Greska! Unesite ispravan tip varijable!\n");
+			success = 0;
+			while (getchar() != '\n');
+		}
+	} while (!success);
+
+
 
 	while (current != NULL) {
 		if (strcmp(current->surname, surnameToDelete) == 0) {
@@ -281,5 +375,3 @@ int menuForFunctions(PersonPosition head)
 		}
 	}
 }
-
-
