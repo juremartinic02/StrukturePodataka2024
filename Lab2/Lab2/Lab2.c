@@ -193,6 +193,11 @@ void printLikedList(PersonPosition first)
 		printf("Ime: %s\tPrezime: %s\tGodina rodjenja: %d\n", first->name, first->surname, first->birthYear);
 		first = first->next;
 	}
+
+	if (first == NULL)
+	{
+		printf("Lista je prazna!\n");
+	}
 }
 
 int addNewPersonToEndOfLinkedList(PersonPosition head)
