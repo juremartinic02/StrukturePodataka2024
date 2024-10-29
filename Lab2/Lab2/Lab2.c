@@ -3,7 +3,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-// zbog isalpha funckije koja nam omogucuje provjeru korisnikovog upisa
+// zbog isAlpha funckije
 #include<ctype.h>
 #include<crtdbg.h>
 
@@ -73,6 +73,12 @@ int deleteElementFromLinkedList(PersonPosition);
 */
 int menuForFunctions(PersonPosition);
 
+/*
+	Funkcija isStringValid
+	---------------------------
+		Funckija provjerava korisnikov input pomocu isAlpha funckije cime osiguravamo da budemo sigurni
+			da korisnik upisuje tocan tip podatka koji se od njega ocekuje
+*/
 int isStringValid(char*);
 
 int main()
@@ -93,11 +99,11 @@ int main()
 // PITANJE ZA PROFESORICU: ovdje sam se pomogao chat-gpt. Da li se ovo moglo na drugaciji nacin preko if while petlje ili samo da zapamtit da se to radi preko isalpha integrirane funckije
 int isStringValid(char* input) {
 	for (int i = 0; input[i] != '\0'; i++) {
-		if (!isalpha(input[i])) {  // Check if each character is a letter
-			return 0;  // Return 0 if a non-letter character is found
+		if (!isalpha(input[i])) {  // isAlpha je funckija koja za nas provjerava da li je korisnikov unos bio char
+			return 0;  // vracamo 0 ako su ima znak koji je korisnik unio a da nije char 
 		}
 	}
-	return 1;  // Return 1 if all characters are letters
+	return 1;  // vracamo 1 ako su svi znakovi koje je korisnik unio tipa char
 }
 
 PersonPosition createNewPerson(char* name, char* surname, int birthYear)
@@ -127,9 +133,8 @@ int addNewPersonToLinkedList(PersonPosition head)
 	char surname[MAX_NAME_LENGTH];
 	int birthYear;
 
-	// PITANJE ZA PROFESORICU: ovo je naravno jednostavniji nacin za rijesiti provjeru scanf return value-a, da li smijemo tako ostaviti ili moramo if funkcijom provjeravat
-	// (void) ispred scanf-a sprjecava upozorenje: 'return value ignored' tako sto compileru daje do znanja da ju namjerno ignoriramo
-	// PITANJE ZA PROFESORICU: koji je drugaciji nacin osim ovog "BRUTEFORCE-anja" kroz do while petlju? Odvojena funckija mozda?
+	// PITANJE ZA PROFESORICU: koji je drugaciji nacin osim ovog "BRUTEFORCE-anja" kroz do while petlju? 
+	// Odvojena funckija mozda? Da li bi svakako bila pozeljna u ovom slucaju ponavljanja iste do while petlje
 
 	int success;
 
@@ -158,6 +163,9 @@ int addNewPersonToLinkedList(PersonPosition head)
 	} while (!success);
 
 	printf("Unesite godinu rodjenja: ");
+
+	// PITANJE ZA PROFESORICU: ovo je naravno jednostavniji nacin za rijesiti provjeru scanf return value-a, da li smijemo tako ostaviti ili moramo if funkcijom provjeravat
+	// (void) ispred scanf-a sprjecava upozorenje: 'return value ignored' tako sto compileru daje do znanja da ju namjerno ignoriramo
 	(void)scanf("%d", &birthYear);
 
 	newPerson = createNewPerson(name, surname, birthYear);
@@ -274,7 +282,7 @@ int findElementOfLinkedListBySurname(PersonPosition first)
 		printf("Osoba sa prezimenom '%s' nije pronadjena.\n", surnameToFind);
 	}
 
-	// PITANJE ZA PROFESORICU: da li smo ovo mogli napraviti preko return ? <argument> : <argument> i da li je to preferirani nacin
+	// PITANJE ZA PROFESORICU: da li preferirano rjesenje za ovu if petlju: return ? <argument> : <argument>
 	if (found == 1)
 	{
 		return EXIT_SUCCESS;
