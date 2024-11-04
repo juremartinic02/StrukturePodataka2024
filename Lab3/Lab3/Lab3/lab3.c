@@ -7,6 +7,7 @@
 #include<ctype.h>
 #include<crtdbg.h>
 
+#define MAX_BUFFER_LENGTH 1024
 #define MAX_NAME_LENGTH 100
 #define ERROR_ALLOCATING_MEMORY -1
 
@@ -82,14 +83,35 @@ int insertAfterElement(PersonPosition);
 */
 int insertBeforeElement(PersonPosition);
 
-PersonPosition getMiddle(PersonPosition);
-PersonPosition mergeSortedLists(PersonPosition, PersonPosition);
-PersonPosition mergeSort(PersonPosition head);
 
+PersonPosition sortedInsert(PersonPosition, PersonPosition);
+/*
+	Funckija sortList: (funckija 8 u menu)
+	----------------------------------
+		Funkcija sortira listu abecedno
+*/
+PersonPosition sortList(PersonPosition);
+
+/*
+	Funckija writeListInFile: (funckija 9 u menu)
+	----------------------------------
+		Funkcija pomocu fprintf funckije upisuje sve elemente jednostruko vezane liste koje smo do tog momenta kreirali
+*/
 int writeListInFile(PersonPosition, char*);
+
+/*
+	Funckija readListFromFile: (funckija 10 u menu)
+	----------------------------------
+		Funkcija cita iz liste sve elemente iz datoteke te kreira jednostruko vezanu listu sa njima!
+*/
 int readListFromFile(PersonPosition, char*);
 
-void freeList(PersonPosition);
+/*
+	Funckija deleteAll: (funckija 11 u menu)
+	----------------------------------
+		Funkcija brise sve elemente iz jednostruko vezane liste te oslobadja svu dinamicki alociranu memoriju!
+*/
+void deleteAll(PersonPosition);
 
 /*
 	Funckija menuForFunctions
@@ -111,22 +133,7 @@ int isStringValid(char*);
 	--------------------------------------
 		Funckija koja koristi isStringValid funckiju u do-while loop-u sve dok korisnik ne unese ispravan tip podatka
 */
-int getValidStringInput(char* prompt, char* inputBuffer, int bufferSize) {
-	int success = 0;
-
-	do {
-		printf("%s", prompt);
-		success = scanf("%s", inputBuffer);
-
-		if (success != 1 || !isStringValid(inputBuffer)) {
-			printf("Greska! Unesite ispravan tip varijable!\n");
-			success = 0;
-			while (getchar() != '\n');
-		}
-	} while (!success);
-
-	return success;
-}
+static int getValidStringInput(char* prompt, char* inputBuffer, int bufferSize);
 
 int main()
 {
@@ -145,6 +152,23 @@ int isStringValid(char* input) {
 		}
 	}
 	return 1;  // vracamo 1 ako su svi znakovi koje je korisnik unio tipa char
+}
+
+static int getValidStringInput(char* prompt, char* inputBuffer, int bufferSize) {
+	int success = 0;
+
+	do {
+		printf("%s", prompt);
+		success = scanf("%s", inputBuffer);
+
+		if (success != 1 || !isStringValid(inputBuffer)) {
+			printf("Greska! Unesite ispravan tip varijable!\n");
+			success = 0;
+			while (getchar() != '\n');
+		}
+	} while (!success);
+
+	return success;
 }
 
 PersonPosition createNewPerson(char* name, char* surname, int birthYear)
@@ -194,17 +218,17 @@ int addNewPersonToLinkedList(PersonPosition head)
 
 void printLikedList(PersonPosition first)
 {
+	if (first == NULL)
+	{
+		printf("Lista je prazna!\n");
+	}
+
 	printf("\nElementi jednostruko vezane liste su: \n");
 
 	while (first)
 	{
 		printf("Ime: %s\tPrezime: %s\tGodina rodjenja: %d\n", first->name, first->surname, first->birthYear);
 		first = first->next;
-	}
-
-	if (first == NULL)
-	{
-		printf("Lista je prazna!\n");
 	}
 }
 
@@ -351,57 +375,114 @@ int insertBeforeElement(PersonPosition head) {
 	return EXIT_SUCCESS;
 }
 
-PersonPosition getMiddle(PersonPosition head) {
-	if (head == NULL) {
-		return NULL;
+PersonPosition sortedInsert(PersonPosition sortedHead, PersonPosition newNode) {
+	if (sortedHead == NULL || strcmp(newNode->surname, sortedHead->surname) <= 0) {
+		newNode->next = sortedHead;
+		return newNode;
 	}
 
-	PersonPosition slow = head;
-	PersonPosition fast = head->next;
-
-	while (fast != NULL && fast->next != NULL) {
-		slow = slow->next;
-		fast = fast->next->next;
+	PersonPosition current = sortedHead;
+	while (current->next != NULL && strcmp(current->next->surname, newNode->surname) < 0) {
+		current = current->next;
 	}
 
-	return slow;
+	newNode->next = current->next;
+	current->next = newNode;
+
+	return sortedHead;
 }
 
-PersonPosition mergeSortedLists(PersonPosition a, PersonPosition b) {
-	if (!a) return b;
-	if (!b) return a;
+PersonPosition sortList(PersonPosition head) {
+	if (head == NULL || head->next == NULL) {
+		return head;
+	}
 
-	if (strcmp(a->surname, b->surname) <= 0) {
-		a->next = mergeSortedLists(a->next, b);
-		return a;
+	PersonPosition sortedHead = NULL;
+	PersonPosition current = head;
+
+	while (current != NULL) {
+		PersonPosition nextNode = current->next;
+		sortedHead = sortedInsert(sortedHead, current);
+		current = nextNode;
 	}
-	else {
-		b->next = mergeSortedLists(a, b->next);
-		return b;
-	}
+
+	return sortedHead;
 }
 
-PersonPosition mergeSort(PersonPosition head) {
-	if (!head || !head->next) return head;
 
-	PersonPosition middle = getMiddle(head);
-	PersonPosition nextToMiddle = middle->next;
+int writeListInFile(PersonPosition head, char* filename) {
+	FILE* file = NULL;
+	file = fopen(filename, "w");
+	if (!file) {
+		printf("Neuspjelo otvaranje datoteke!\n");
+		return EXIT_FAILURE;
+	}
 
-	middle->next = NULL;
+	PersonPosition current = head->next;
+	while (current != NULL) {
+		fprintf(file, "%s %s %d\n", current->name, current->surname, current->birthYear);
+		current = current->next;
+	}
 
-	PersonPosition left = mergeSort(head);
-	PersonPosition right = mergeSort(nextToMiddle);
-
-	return mergeSortedLists(left, right);
+	fclose(file);
+	printf("Lista je uspjesno zapisana u datoteku '%s'.\n", filename);
+	return EXIT_SUCCESS;
 }
 
-int writeListInFile(PersonPosition, char*);
-int readListFromFile(PersonPosition, char*);
-void freeList(PersonPosition);
+int readListFromFile(PersonPosition head, char* filename) {
+	FILE* file = NULL;
+	file = fopen(filename, "r");
+	if (!file) {
+		printf("Neuspjelo otvaranje datoteke!\n");
+		return EXIT_FAILURE;
+	}
+
+	char buffer[MAX_BUFFER_LENGTH];
+	char name[MAX_NAME_LENGTH];
+	char surname[MAX_NAME_LENGTH];
+	int birthYear = 0;
+
+	while (fgets(buffer, sizeof(buffer), file) != NULL) {
+		if (sscanf(buffer, "%s %s %d", name, surname, &birthYear) == 3) {
+			PersonPosition newPerson = createNewPerson(name, surname, birthYear);
+			if (newPerson == NULL) {
+				fclose(file);
+				return EXIT_FAILURE;
+			}
+
+			PersonPosition temp = head;
+			while (temp->next != NULL) {
+				temp = temp->next;
+			}
+			temp->next = newPerson;
+		}
+		else {
+			printf("Pogresan format linije: %s", buffer);
+		}
+	}
+
+	fclose(file);
+	printf("Lista je uspjesno ucitana iz datoteke '%s'.\n", filename);
+	return EXIT_SUCCESS;
+}
+
+void deleteAll(PersonPosition head) {
+	PersonPosition temp = NULL;
+
+	while (head->next != NULL) {
+		temp = head->next;
+		head->next = temp->next;
+		free(temp);
+	}
+
+	printf("Svi elementi liste su uspjesno obrisani.\n");
+}
+
 
 int menuForFunctions(PersonPosition head)
 {
 	int choice = 0;
+	char filename[MAX_NAME_LENGTH];
 
 	while (1)
 	{
@@ -416,6 +497,7 @@ int menuForFunctions(PersonPosition head)
 		printf("\t8. Sortiraj jednostruko vezanu listu po prezimenima (abecedno)\n");
 		printf("\t9. Upisi jednostruko vezanu listu u datoteku\n");
 		printf("\t10. Citaj listu iz datoteke\n");
+		printf("\t11. Izbrisi sve elemente iz liste i oslobodi svu dinamicki alociranu memoriju!\n");
 		printf("\t0. Izlaz\n");
 		printf("Unesite broj opcije: ");
 
@@ -445,7 +527,20 @@ int menuForFunctions(PersonPosition head)
 			insertBeforeElement(head);
 			break;
 		case 8:
-			mergeSort(head);
+			sortList(head);
+			break;
+		case 9:
+			printf("Unesite ime datoteke: ");
+			(void)scanf("%s", filename);
+			writeListInFile(head, filename);
+			break;
+		case 10:
+			printf("Unesite ime datoteke: ");
+			(void)scanf("%s", filename);
+			readListFromFile(head, filename);
+			break;
+		case 11: 
+			deleteAll(head);
 			break;
 		case 0:
 			return EXIT_SUCCESS;
