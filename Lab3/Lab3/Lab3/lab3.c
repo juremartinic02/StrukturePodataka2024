@@ -218,6 +218,8 @@ int addNewPersonToLinkedList(PersonPosition head)
 
 void printLikedList(PersonPosition first)
 {
+	// PITANJE ZA PROFESORICU: prosli put smo ovo provjerili
+	// i kasnije kada sam pokusavao kreirati listu uvijek bi dobijao i poruku lista je prazna pa sam ovo premjestia gori
 	if (first == NULL)
 	{
 		printf("Lista je prazna!\n");
@@ -375,17 +377,26 @@ int insertBeforeElement(PersonPosition head) {
 	return EXIT_SUCCESS;
 }
 
+// PITANJE ZA PROFESORICU: ukoliko bi vise parametara bilo potrebno za sortiranje morali bi pretpostavljam kreirati novu funckiju
+// da li bi ta funckija potencijalno mogla izgledati da kreiramo pomocnu varijablu int result = strcmp(a.name, b.name);
+// sa npr if petljom onda ako je result == 0 postavljamo result = strcmp(a.surname, b.surname) i onda na kraju returnamo result
+
+// funckija prima head sortirane liste i element koji zelimo dodati
 PersonPosition sortedInsert(PersonPosition sortedHead, PersonPosition newNode) {
+	// provjera da li je lista sortirana i da li prezime novog cvora abecedno mora ic ispred prvog clana liste
+	// taj cvor prebacujemo na pocetak liste i postavljamo ga kao head element liste
 	if (sortedHead == NULL || strcmp(newNode->surname, sortedHead->surname) <= 0) {
 		newNode->next = sortedHead;
 		return newNode;
 	}
 
+	// pronalazenje pozicije u listi gdje moramo umetnuti novi cvor
 	PersonPosition current = sortedHead;
 	while (current->next != NULL && strcmp(current->next->surname, newNode->surname) < 0) {
 		current = current->next;
 	}
 
+	// povezivanje novog cvora u vezanoj listi kada mu prethodno nadjemo poziciju
 	newNode->next = current->next;
 	current->next = newNode;
 
